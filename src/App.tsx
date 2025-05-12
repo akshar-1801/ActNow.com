@@ -1,5 +1,6 @@
 import Homepage from './components/HomePage';
 import SDGPage from './components/SDGPage';
+import MissionInActionPage from './components/MissionInActionPage'
 
 function App() {
 
@@ -7,6 +8,7 @@ function App() {
     <>
       <Homepage />
       <SDGPage />
+      <MissionInActionPage />
     </>
   );
 }

@@ -93,7 +93,7 @@ const Homepage = () => {
                             transition={{ duration: 0.5, delay: 0.2 }}
                         >
                             <a href="#SDGPage" className="text-black hover:text-[#124632] hover:font-bold transition-colors">About SDGs</a>
-                            <a href="/projects" className="text-black hover:text-[#124632] hover:font-bold transition-colors">
+                            <a href="#Project" className="text-black hover:text-[#124632] hover:font-bold transition-colors">
                                 Our Projects
                             </a>
                             <a href="/take-action" className="text-black hover:text-[#124632] hover:font-bold transition-colors">
@@ -135,14 +135,14 @@ const Homepage = () => {
                     >
                         <div className="px-4 py-4 space-y-4">
                             <a
-                                href="/about-sdgs"
+                                href="#SDGPage"
                                 className="block text-black hover:text-[#124632] hover:font-bold py-2 transition-colors"
                                 onClick={handleMenuItemClick}
                             >
                                 About SDGs
                             </a>
                             <a
-                                href="/projects"
+                                href="#Project"
                                 className="block text-black hover:text-[#124632] hover:font-bold py-2 transition-colors"
                                 onClick={handleMenuItemClick}
                             >
@@ -169,7 +169,7 @@ const Homepage = () => {
             </nav>
 
             {/* Hero Section */}
-            <div className="pt-24 pb-16 md:pt-32 md:pb-24 bg-stone-50">
+            <div className="pt-32 pb-16 md:pt-32 md:pb-24 bg-stone-50">
                 <div className="w-full max-w-6xl mx-auto px-4">
                     <div className="flex flex-col md:flex-row items-center">
                         {/* Left Content */}
@@ -181,7 +181,7 @@ const Homepage = () => {
                             variants={staggerContainer}
                         >
                             <motion.h1
-                                className="font-merriweather text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#124632] leading-tight mb-6 mt-14"
+                                className="font-merriweather text-5xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[#124632] leading-tight mb-6 mt-14"
                                 variants={slideUp}
                             >
                                 Together, We Can Create a Better Tomorrow
