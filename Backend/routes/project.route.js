@@ -1,4 +1,5 @@
 const express = require("express");
+const upload = require("../middleware/multer");
 const {
   getAllProjects,
   getProjectById,
@@ -16,12 +17,12 @@ router.get("/", getAllProjects);
 router.get("/:id", getProjectById);
 
 // Create a new project
-router.post("/", createProject);
+router.post("/",  upload.array('images',10),createProject);
 
 // Update a project
-router.put("/:id", updateProject);
+router.put("/:id",upload.array('images',10),updateProject);
 
 // Delete a project
-router.delete("/:id", deleteProject);
+router.delete("/:id", deleteProject); 
 
 module.exports = router;
