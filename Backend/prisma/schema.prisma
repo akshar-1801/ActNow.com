@@ -67,7 +67,7 @@ model Project {
 
 model Multimedia {
     id        Int      @id @default(autoincrement())
-    type      String // 'photo', 'video', 'infographic'
+    type      String 
     url       String
     title     String?
     project   Project? @relation(fields: [projectId], references: [id])
