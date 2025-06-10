@@ -8,10 +8,15 @@ const cloudinary = require("../config/cloudinary");
 // Get all projects
 exports.getAllProjects = async (req, res) => {
   try {
-    const projects = await prisma.project.findMany();
-    res.json(projects);
+    const projects = await prisma.project.findMany({
+      include: {
+        multimedia: true, // This includes all multimedia items for each project
+      },
+    });
+
+    res.status(200).json( projects );
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch projects" });
+    res.status(500).json({ error: "Failed to fetch projects", detail: error.message });
   }
 };
 
@@ -19,9 +24,16 @@ exports.getAllProjects = async (req, res) => {
 exports.getProjectById = async (req, res) => {
   try {
     const project = await prisma.project.findUnique({
-      where: { id: (req.params.id) },
+      where: { id: req.params.id },
+      include: {
+        multimedia: true, // include multimedia relation
+      },
     });
-    if (!project) return res.status(404).json({ error: "Project not found" });
+
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
     res.json(project);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch project" });
@@ -30,10 +42,10 @@ exports.getProjectById = async (req, res) => {
 
 exports.createProject = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, location, category, date, content } = req.body;
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ error: "At least one image file is required" });
+      return res.status(400).json({ error: "At least one media file is required" });
     }
 
     const multimediaData = [];
@@ -44,7 +56,6 @@ exports.createProject = async (req, res) => {
         const result = await cloudinary.uploader.upload(file.path);
 
         uploadedPublicIds.push(result.public_id);
-        // console.log(uploadedPublicIds);
 
         multimediaData.push({
           url: result.secure_url,
@@ -57,18 +68,17 @@ exports.createProject = async (req, res) => {
         if (fs.existsSync(file.path)) {
           try {
             fs.unlinkSync(file.path);
-          } catch (_) { }
+          } catch (_) {}
         }
 
         for (const publicId of uploadedPublicIds) {
-          // console.log(publicId)
           try {
             await cloudinary.uploader.destroy(publicId);
-          } catch (_) { }
+          } catch (_) {}
         }
 
         return res.status(500).json({
-          error: "One or more image uploads failed",
+          error: "One or more uploads failed",
           detail: uploadError.message,
         });
       }
@@ -78,6 +88,10 @@ exports.createProject = async (req, res) => {
       data: {
         name,
         description,
+        location,
+        category,
+        content,
+        date: date ? new Date(date) : undefined,  // Convert date string to Date object
         multimedia: {
           create: multimediaData,
         },
@@ -96,13 +110,17 @@ exports.createProject = async (req, res) => {
       req.files.forEach((file) => {
         try {
           if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
-        } catch (_) { }
+        } catch (_) {}
       });
     }
 
-    res.status(500).json({ error: "Upload and creation failed", detail: error.message });
+    res.status(500).json({
+      error: "Upload and creation failed",
+      detail: error.message,
+    });
   }
 };
+
 
 
 

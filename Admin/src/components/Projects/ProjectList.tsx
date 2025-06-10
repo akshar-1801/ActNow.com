@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo,useEffect } from "react";
 import {
   Search,
   Filter,
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useNavigate } from "react-router-dom";
+import { getAllProjects } from "@/api/project";
 
 const sampleProjects = [
   {
@@ -39,93 +40,6 @@ const sampleProjects = [
         title: "City Overview",
       },
       { id: 2, type: "video", url: "#", title: "Project Demo" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Ocean Conservation Initiative",
-    description:
-      "Comprehensive marine ecosystem restoration project focused on coral reef rehabilitation and marine biodiversity protection.",
-    location: "Great Barrier Reef, Australia",
-    category: "Environmental",
-    date: new Date("2024-01-20"),
-    multimedia: [
-      {
-        id: 3,
-        type: "photo",
-        url: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=800&h=600&fit=crop",
-        title: "Coral Restoration",
-      },
-      { id: 4, type: "infographic", url: "#", title: "Impact Statistics" },
-    ],
-  },
-  {
-    id: "3",
-    name: "Renewable Energy Grid",
-    description:
-      "Next-generation solar and wind power distribution network designed to power sustainable communities across rural areas.",
-    location: "Texas, USA",
-    category: "Energy",
-    date: new Date("2024-02-10"),
-    multimedia: [
-      {
-        id: 5,
-        type: "photo",
-        url: "https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=800&h=600&fit=crop",
-        title: "Solar Installation",
-      },
-    ],
-  },
-  {
-    id: "4",
-    name: "Urban Vertical Farming",
-    description:
-      "Innovative hydroponic farming towers that maximize food production in minimal urban space using advanced LED growing systems.",
-    location: "Singapore",
-    category: "Agriculture",
-    date: new Date("2024-04-05"),
-    multimedia: [
-      {
-        id: 6,
-        type: "photo",
-        url: "https://images.unsplash.com/photo-1530587191325-3db32d826c18?w=800&h=600&fit=crop",
-        title: "Vertical Farm",
-      },
-      { id: 7, type: "video", url: "#", title: "Growing Process" },
-    ],
-  },
-  {
-    id: "5",
-    name: "AI Healthcare Platform",
-    description:
-      "Machine learning powered diagnostic system that assists medical professionals in early disease detection and treatment planning.",
-    location: "London, UK",
-    category: "Healthcare",
-    date: new Date("2024-05-12"),
-    multimedia: [
-      {
-        id: 8,
-        type: "infographic",
-        url: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=800&h=600&fit=crop",
-        title: "AI Interface",
-      },
-    ],
-  },
-  {
-    id: "6",
-    name: "Space Tourism Hub",
-    description:
-      "Commercial spaceport facility designed for civilian space travel with state-of-the-art safety systems and luxury amenities.",
-    location: "Nevada, USA",
-    category: "Aerospace",
-    date: new Date("2024-06-01"),
-    multimedia: [
-      {
-        id: 9,
-        type: "photo",
-        url: "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=800&h=600&fit=crop",
-        title: "Spaceport Design",
-      },
     ],
   },
 ];
@@ -154,28 +68,29 @@ const getMediaIcon = (type: string) => {
 };
 
 const ProjectList: React.FC = () => {
+  const [projects, setProjects] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("date");
   const navigate = useNavigate();
 
   const filteredAndSortedProjects = useMemo(() => {
-    let filtered = sampleProjects.filter((project) => {
+    let filtered = projects.filter((project) => {
       const matchesSearch =
         project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.location?.toLowerCase().includes(searchTerm.toLowerCase());
+
       const matchesCategory =
         selectedCategory === "All" || project.category === selectedCategory;
+
       return matchesSearch && matchesCategory;
     });
 
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case "date":
-          return (
-            new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime()
-          );
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
         case "name":
           return a.name.localeCompare(b.name);
         case "category":
@@ -184,7 +99,19 @@ const ProjectList: React.FC = () => {
           return 0;
       }
     });
-  }, [searchTerm, selectedCategory, sortBy]);
+  }, [projects, searchTerm, selectedCategory, sortBy]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const data = await getAllProjects();
+        setProjects(data);
+      } catch (error) {
+        console.error("Failed to fetch projects", error);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -317,7 +244,7 @@ const ProjectList: React.FC = () => {
                     {project.date && (
                       <div className="flex items-center text-xs text-gray-500">
                         <Calendar className="w-3 h-3 mr-2" />
-                        <span>{project.date.toLocaleDateString()}</span>
+                        <span>{new Date(project.date).toLocaleDateString()}</span>
                       </div>
                     )}
                   </div>

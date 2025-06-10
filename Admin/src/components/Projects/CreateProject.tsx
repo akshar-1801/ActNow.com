@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { createProject } from './../../api/project';
 
 interface MultimediaItem {
   id: string;
@@ -61,7 +62,7 @@ const CreateProject: React.FC = () => {
     category: "",
     date: "",
     content: "",
-    multimedia: [],
+    multimedia: []
   });
 
   const [dragActive, setDragActive] = useState(false);
@@ -169,14 +170,29 @@ const CreateProject: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = () => {
+  const  handleSubmit = async () => {
     if (!validateForm()) {
       return;
     }
+    const form = new FormData();
+    form.append("name", formData.name);
+    form.append("description", formData.description);
+    form.append("location", formData.location);
+    form.append("category", formData.category);
+    form.append("date", formData.date);
+    form.append("content", formData.content);
 
-    // In real implementation, you would submit to your API
-    console.log("Project Data:", formData);
-    alert("Project created successfully! (Check console for data)");
+    formData.multimedia.forEach((item) => {
+      if (item.file) {
+        form.append("images", item.file);
+      }
+    });
+    try {
+      await createProject(form);
+      alert("Project created successfully!");
+    } catch (err: any) {
+      alert("Error: " + err.response?.data?.error || err.message);
+    }
   };
 
   const formatContentPreview = (content: string) => {
@@ -378,11 +394,10 @@ const CreateProject: React.FC = () => {
               <CardContent>
                 {/* Drag and Drop Area */}
                 <div
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                    dragActive
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${dragActive
                       ? "border-blue-500 bg-blue-50"
                       : "border-gray-300"
-                  }`}
+                    }`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
@@ -614,9 +629,8 @@ Describe your project in detail...
 **Technical details** about your project...
 "
                   rows={15}
-                  className={`font-mono ${
-                    errors.content ? "border-red-500" : ""
-                  }`}
+                  className={`font-mono ${errors.content ? "border-red-500" : ""
+                    }`}
                 />
                 {errors.content && (
                   <p className="text-red-500 text-sm mt-1">{errors.content}</p>
